@@ -31,3 +31,22 @@
 		"source": "Matcher match = /.*\"job_id\": \"([^\"]+)\".*/.matcher(ctx._source.text_field); if (match.matches()) { ctx._source.extracted_field = match.group(1); } else { throw new Exception(ctx._source.text_field); }"
 	}
 }
+
+// Find duplicates by aggregating on calculated field
+{
+  "size": 0,
+  "aggs": {
+    "duplicateCount": {
+      "terms": {
+    	"script": "doc['first_name'] + doc['last_name']",
+        "min_doc_count": 2,
+        "size": 10000
+      },
+      "aggs": {
+        "duplicateDocuments": {
+          "top_hits": {}
+        }
+      }
+    }
+  }
+}
